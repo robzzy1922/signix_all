@@ -13,12 +13,9 @@ use App\Http\Controllers\Admin\Auth\AdminLoginController;
 use App\Http\Controllers\Admin\Auth\AdminDashboardController;
 use App\Http\Controllers\Admin\Auth\AdminDokumenController;
 use App\Http\Controllers\DocumentController;
-Route::get('/', function () {
-    return view('welcome');
-});
 
 //login
-Route::get('/login', [LoginAuthController::class, 'showLoginForm'])->name('login');
+Route::get('/', [LoginAuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginAuthController::class, 'login'])->name('login.submit');
 
 

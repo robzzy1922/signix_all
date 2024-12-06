@@ -19,11 +19,11 @@ class Dokumen extends Model
         'file',
         'status_dokumen',
         'qr_code_path',
-        'is_signed',
         'qr_position_x',
         'qr_position_y',
         'qr_width',
         'qr_height',
+        'is_signed',
         'kode_pengesahan'
     ];
 

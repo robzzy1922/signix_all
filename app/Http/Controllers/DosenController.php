@@ -17,6 +17,11 @@ use BaconQrCode\Writer;
 use BaconQrCode\Renderer\Image\EpsImageBackEnd;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
+use BaconQrCode\Renderer\Image\PngImageBackEnd;
+use Illuminate\Routing\Controller;
+use BaconQrCode\Renderer\Image\Svg;
+use Endroid\QrCode\Builder\Builder;
+    use Endroid\QrCode\Writer\PngWriter;
 
 class DosenController extends Controller
 {
@@ -192,51 +197,40 @@ class DosenController extends Controller
         return redirect()->route('login')->with('success', 'Berhasil logout');
     }
 
+
+
     public function generateQrCode($id)
     {
         try {
             $dokumen = Dokumen::findOrFail($id);
-            
-            // Generate kode pengesahan jika belum ada
-            if (!$dokumen->kode_pengesahan) {
-                $dokumen->kode_pengesahan = Str::random(10);
-                $dokumen->save();
-            }
 
-            // Buat URL verifikasi yang mencakup kode pengesahan
-            $verificationUrl = url("/verify/document/{$id}?kode={$dokumen->kode_pengesahan}");
+            // URL yang akan dimasukkan ke dalam QR Code
+            $verificationUrl = route('verify.document', ['id' => $id]);
 
-            // Pastikan direktori exists
-            $qrDirectory = storage_path('app/public/qrcodes');
-            if (!file_exists($qrDirectory)) {
-                mkdir($qrDirectory, 0755, true);
-            }
+            // Generate QR Code dengan Endroid
+            $qrCode = Builder::create()
+                ->writer(new PngWriter())
+                ->data($verificationUrl)
+                ->size(300) // Ukuran QR Code
+                ->margin(10) // Margin QR Code
+                ->build();
 
-            // Generate QR Code dalam format PNG
+            // Simpan QR Code ke storage/public/qrcodes
             $qrCodePath = 'qrcodes/qr_' . $id . '_' . time() . '.png';
             $fullPath = storage_path('app/public/' . $qrCodePath);
 
-            // Gunakan SimpleSoftwareIO\QrCode\Facades\QrCode dengan format PNG
-            QrCode::format('png')
-                  ->size(400)
-                  ->margin(1)
-                  ->backgroundColor(255, 255, 255)
-                  ->color(0, 0, 0)
-                  ->generate($verificationUrl, $fullPath);
+            // Simpan file QR Code ke disk
+            file_put_contents($fullPath, $qrCode->getString());
 
-            // Update dokumen dengan path QR code
-            $dokumen->update([
-                'qr_code_path' => $qrCodePath
-            ]);
+            // Update path QR Code di database
+            $dokumen->update(['qr_code_path' => $qrCodePath]);
 
             return response()->json([
                 'success' => true,
-                'qrCodeUrl' => Storage::disk('public')->url($qrCodePath),
-                'message' => 'QR Code berhasil dibuat'
+                'qrCodeUrl' => asset('storage/' . $qrCodePath), // URL untuk digunakan di frontend
+                'message' => 'QR Code berhasil dibuat.'
             ]);
-
         } catch (\Exception $e) {
-            \Log::error('QR Code Generation Error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal membuat QR Code: ' . $e->getMessage()
@@ -244,87 +238,88 @@ class DosenController extends Controller
         }
     }
 
-    public function saveQrPosition(Request $request, Dokumen $dokumen)
-    {
-        try {
-            // Validasi request
-            $validated = $request->validate([
-                'x' => 'required|numeric',
-                'y' => 'required|numeric',
-                'width' => 'required|numeric',
-                'height' => 'required|numeric',
-            ]);
 
-            // Pastikan QR code sudah di-generate
-            if (!$dokumen->qr_code_path || !Storage::disk('public')->exists($dokumen->qr_code_path)) {
-                throw new \Exception('QR Code belum di-generate');
-            }
+public function saveQrPosition(Request $request, $id)
+{
+    try {
+        $dokumen = Dokumen::findOrFail($id);
 
-            // Baca file PDF asli
-            $sourcePdfPath = storage_path('app/public/' . $dokumen->file);
-            if (!file_exists($sourcePdfPath)) {
-                throw new \Exception('File PDF sumber tidak ditemukan');
-            }
+        // Validasi request
+        $validated = $request->validate([
+            'x' => 'required|numeric',
+            'y' => 'required|numeric',
+            'width' => 'required|numeric',
+            'height' => 'required|numeric',
+        ]);
 
-            // Inisialisasi FPDI
-            $pdf = new FPDI();
-            $pageCount = $pdf->setSourceFile($sourcePdfPath);
-
-            // Proses setiap halaman
-            for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
-                $pdf->AddPage();
-                $tplIdx = $pdf->importPage($pageNo);
-                $pdf->useTemplate($tplIdx);
-
-                // Tambahkan QR code hanya di halaman pertama
-                if ($pageNo === 1) {
-                    $qrCodePath = storage_path('app/public/' . $dokumen->qr_code_path);
-                    if (!file_exists($qrCodePath)) {
-                        throw new \Exception('File QR Code tidak ditemukan');
-                    }
-
-                    // Konversi koordinat relatif ke absolut
-                    $x = ($validated['x'] / 100) * $pdf->GetPageWidth();
-                    $y = ($validated['y'] / 100) * $pdf->GetPageHeight();
-                    $width = ($validated['width'] / 100) * $pdf->GetPageWidth();
-                    $height = ($validated['height'] / 100) * $pdf->GetPageHeight();
-
-                    // Tambahkan QR code ke PDF
-                    $pdf->Image($qrCodePath, $x, $y, $width, $height);
-                }
-            }
-
-            // Simpan PDF yang sudah ditandatangani
-            $newFileName = 'signed_' . time() . '_' . basename($dokumen->file);
-            $newFilePath = 'dokumen/' . $newFileName;
-            
-            // Simpan ke storage
-            Storage::disk('public')->put($newFilePath, $pdf->Output('S'));
-
-            // Update dokumen di database
-            $dokumen->update([
-                'file' => $newFilePath,
-                'qr_position_x' => $validated['x'],
-                'qr_position_y' => $validated['y'],
-                'qr_width' => $validated['width'],
-                'qr_height' => $validated['height'],
-                'status_dokumen' => 'disahkan',
-                'is_signed' => true
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'QR Code berhasil ditambahkan dan dokumen telah disahkan'
-            ]);
-
-        } catch (\Exception $e) {
-            \Log::error('Error in saveQrPosition: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal menyimpan QR code: ' . $e->getMessage()
-            ], 500);
+        // Pastikan QR code sudah di-generate
+        if (!$dokumen->qr_code_path || !Storage::disk('public')->exists($dokumen->qr_code_path)) {
+            throw new \Exception('QR Code belum di-generate.');
         }
+
+        // Baca file PDF asli
+        $sourcePdfPath = storage_path('app/public/' . $dokumen->file);
+        if (!file_exists($sourcePdfPath)) {
+            throw new \Exception('File PDF sumber tidak ditemukan.');
+        }
+
+        // Inisialisasi FPDI
+        $pdf = new FPDI();
+        $pageCount = $pdf->setSourceFile($sourcePdfPath);
+
+        // Proses setiap halaman
+        for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
+            $pdf->AddPage();
+            $tplIdx = $pdf->importPage($pageNo);
+            $pdf->useTemplate($tplIdx);
+
+            // Tambahkan QR code hanya di halaman pertama
+            if ($pageNo === 1) {
+                $qrCodePath = storage_path('app/public/' . $dokumen->qr_code_path);
+
+                // Konversi koordinat relatif ke absolut
+                $x = ($validated['x'] / 100) * $pdf->GetPageWidth();
+                $y = ($validated['y'] / 100) * $pdf->GetPageHeight();
+                $width = ($validated['width'] / 100) * $pdf->GetPageWidth();
+                $height = ($validated['height'] / 100) * $pdf->GetPageHeight();
+
+                // Tambahkan QR code ke PDF
+                $pdf->Image($qrCodePath, $x, $y, $width, $height);
+            }
+        }
+
+        // Simpan PDF yang sudah ditandatangani
+        $newFileName = 'signed_' . time() . '_' . basename($dokumen->file);
+        $newFilePath = 'dokumen/' . $newFileName;
+
+        // Simpan ke storage
+        Storage::disk('public')->put($newFilePath, $pdf->Output('S'));
+
+        // Update dokumen di database
+        $dokumen->update([
+            'file' => $newFilePath,
+            'qr_position_x' => $validated['x'],
+            'qr_position_y' => $validated['y'],
+            'qr_width' => $validated['width'],
+            'qr_height' => $validated['height'],
+            'status_dokumen' => 'disahkan',
+            'is_signed' => true
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'QR Code berhasil ditambahkan dan dokumen telah disahkan.'
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error in saveQrPosition: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal menyimpan QR Code: ' . $e->getMessage()
+        ], 500);
     }
+}
+
 
     public function verifyDocument($id)
     {
@@ -356,7 +351,7 @@ class DosenController extends Controller
     {
         // Ambil dokumen berdasarkan ID
         $dokumen = Dokumen::findOrFail($id);
-        
+
         // Pastikan dosen yang login adalah dosen yang dituju
         if ($dokumen->id_dosen != auth()->id()) {
             abort(403, 'Unauthorized action.');
