@@ -21,7 +21,10 @@ use BaconQrCode\Renderer\Image\PngImageBackEnd;
 use Illuminate\Routing\Controller;
 use BaconQrCode\Renderer\Image\Svg;
 use Endroid\QrCode\Builder\Builder;
-    use Endroid\QrCode\Writer\PngWriter;
+use Endroid\QrCode\Writer\PngWriter;
+use App\Jobs\ProcessQRCode;
+use Illuminate\Support\Facades\Queue;
+use Exception;
 
 class DosenController extends Controller
 {
@@ -276,14 +279,11 @@ public function saveQrPosition(Request $request, $id)
             // Tambahkan QR code hanya di halaman pertama
             if ($pageNo === 1) {
                 $qrCodePath = storage_path('app/public/' . $dokumen->qr_code_path);
-
-                // Konversi koordinat relatif ke absolut
                 $x = ($validated['x'] / 100) * $pdf->GetPageWidth();
                 $y = ($validated['y'] / 100) * $pdf->GetPageHeight();
                 $width = ($validated['width'] / 100) * $pdf->GetPageWidth();
                 $height = ($validated['height'] / 100) * $pdf->GetPageHeight();
 
-                // Tambahkan QR code ke PDF
                 $pdf->Image($qrCodePath, $x, $y, $width, $height);
             }
         }
@@ -291,8 +291,6 @@ public function saveQrPosition(Request $request, $id)
         // Simpan PDF yang sudah ditandatangani
         $newFileName = 'signed_' . time() . '_' . basename($dokumen->file);
         $newFilePath = 'dokumen/' . $newFileName;
-
-        // Simpan ke storage
         Storage::disk('public')->put($newFilePath, $pdf->Output('S'));
 
         // Update dokumen di database
@@ -306,12 +304,15 @@ public function saveQrPosition(Request $request, $id)
             'is_signed' => true
         ]);
 
+        // Dispatch job untuk memproses QR Code ke dalam PDF
+        ProcessQRCode::dispatch($dokumen->id, $validated['x'], $validated['y'], $validated['width'], $validated['height'])->onQueue('default');
+
         return response()->json([
             'success' => true,
-            'message' => 'QR Code berhasil ditambahkan dan dokumen telah disahkan.'
+            'message' => 'QR Code sedang diproses dan akan tersimpan dalam dokumen.'
         ]);
 
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
         Log::error('Error in saveQrPosition: ' . $e->getMessage());
         return response()->json([
             'success' => false,
