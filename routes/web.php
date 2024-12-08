@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\DosenController;
 use App\Http\Controllers\OrmawaController;
+use App\Http\Controllers\DosenController;
 use App\Http\Controllers\LoginAuthController;
 use App\Http\Middleware\EnsureRoleIsAuthenticated;
 use App\Http\Controllers\Admin\Auth\LoginController;
@@ -13,14 +13,7 @@ use App\Http\Controllers\Admin\Auth\AdminLoginController;
 use App\Http\Controllers\Admin\Auth\AdminDashboardController;
 use App\Http\Controllers\Admin\Auth\AdminDokumenController;
 use App\Http\Controllers\DocumentController;
-<<<<<<< HEAD
 
-<<<<<<< HEAD
-=======
-=======
->>>>>>> e047187b14b1b34a520e726854aacc1dedb6a069
-
->>>>>>> bf501092fba5f8a3a2eddc5e7cb28c0823718077
 //login
 Route::get('/', [LoginAuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginAuthController::class, 'login'])->name('login.submit');

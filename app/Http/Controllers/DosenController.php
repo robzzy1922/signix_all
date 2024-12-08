@@ -17,9 +17,7 @@ use BaconQrCode\Writer;
 use BaconQrCode\Renderer\Image\EpsImageBackEnd;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
-<<<<<<< HEAD
 use App\Models\TandaQr;
-=======
 use BaconQrCode\Renderer\Image\PngImageBackEnd;
 use Illuminate\Routing\Controller;
 use BaconQrCode\Renderer\Image\Svg;
@@ -28,7 +26,6 @@ use Endroid\QrCode\Writer\PngWriter;
 use App\Jobs\ProcessQRCode;
 use Illuminate\Support\Facades\Queue;
 use Exception;
->>>>>>> e047187b14b1b34a520e726854aacc1dedb6a069
 
 class DosenController extends Controller
 {
@@ -210,7 +207,6 @@ class DosenController extends Controller
     {
         try {
             $dokumen = Dokumen::findOrFail($id);
-<<<<<<< HEAD
 
             // Generate kode pengesahan jika belum ada
             if (!$dokumen->kode_pengesahan) {
@@ -249,7 +245,6 @@ class DosenController extends Controller
             $dokumen->update([
                 'qr_code_path' => $qrCodePath
             ]);
-=======
 
             // URL yang akan dimasukkan ke dalam QR Code
             $verificationUrl = route('verify.document', ['id' => $id]);
@@ -271,7 +266,6 @@ class DosenController extends Controller
 
             // Update path QR Code di database
             $dokumen->update(['qr_code_path' => $qrCodePath]);
->>>>>>> e047187b14b1b34a520e726854aacc1dedb6a069
 
             return response()->json([
                 'success' => true,
@@ -279,10 +273,8 @@ class DosenController extends Controller
                 'message' => 'QR Code berhasil dibuat.'
             ]);
         } catch (\Exception $e) {
-<<<<<<< HEAD
             Log::error('QR Code Generation Error: ' . $e->getMessage());
-=======
->>>>>>> e047187b14b1b34a520e726854aacc1dedb6a069
+
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal membuat QR Code: ' . $e->getMessage()
@@ -290,7 +282,6 @@ class DosenController extends Controller
         }
     }
 
-<<<<<<< HEAD
     public function saveQrPosition(Request $request, Dokumen $dokumen)
     {
         try {
@@ -381,7 +372,8 @@ class DosenController extends Controller
                 'success' => false,
                 'message' => 'Gagal menyimpan QR code: ' . $e->getMessage()
             ], 500);
-=======
+        }
+    }
 
 public function saveQrPosition(Request $request, $id)
 {
@@ -399,7 +391,6 @@ public function saveQrPosition(Request $request, $id)
         // Pastikan QR code sudah di-generate
         if (!$dokumen->qr_code_path || !Storage::disk('public')->exists($dokumen->qr_code_path)) {
             throw new \Exception('QR Code belum di-generate.');
->>>>>>> e047187b14b1b34a520e726854aacc1dedb6a069
         }
 
         // Baca file PDF asli
@@ -492,10 +483,9 @@ public function saveQrPosition(Request $request, $id)
 
     public function editQrCode($id)
     {
-<<<<<<< HEAD
         try {
             $dokumen = Dokumen::findOrFail($id);
-=======
+
         // Ambil dokumen berdasarkan ID
         $dokumen = Dokumen::findOrFail($id);
 
@@ -503,7 +493,6 @@ public function saveQrPosition(Request $request, $id)
         if ($dokumen->id_dosen != auth()->id()) {
             abort(403, 'Unauthorized action.');
         }
->>>>>>> e047187b14b1b34a520e726854aacc1dedb6a069
 
             if ($dokumen->id_dosen != auth()->id()) {
                 abort(403, 'Unauthorized action.');
