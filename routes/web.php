@@ -14,12 +14,9 @@ use App\Http\Controllers\Admin\Auth\AdminDashboardController;
 use App\Http\Controllers\Admin\Auth\AdminDokumenController;
 use App\Http\Controllers\DocumentController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
 
 //login
-Route::get('/login', [LoginAuthController::class, 'showLoginForm'])->name('login');
+Route::get('/', [LoginAuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginAuthController::class, 'login'])->name('login.submit');
 
 
@@ -49,10 +46,10 @@ Route::middleware(['auth:dosen'])->prefix('dosen')->name('dosen.')->group(functi
     Route::get('/dashboard', [DosenController::class, 'dashboardDosen'])->name('dashboard');
     Route::get('/buat-tanda-tangan', [DosenController::class, 'create'])->name('create');
     Route::post('/logout', [DosenController::class, 'logout'])->name('logout');
-    
+
     // Perbaikan nama route riwayat
     Route::get('/riwayat', [DosenController::class, 'riwayat'])->name('riwayat');
-    
+
     Route::get('/dokumen/{id}', [DosenController::class, 'showDokumen'])->name('dokumen.show');
     Route::get('/dokumen/{id}/content', [DosenController::class, 'getDokumenContent'])->name('dokumen.content');
     Route::get('/profile', [DosenController::class, 'profile'])->name('profile');

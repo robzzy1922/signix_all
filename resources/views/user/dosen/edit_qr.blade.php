@@ -14,7 +14,7 @@
         height: 100%;
         overflow: hidden; /* Prevent content from overflowing */
     }
-    
+
     #pdfViewer {
         background-color: white;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -85,22 +85,32 @@
         <div id="pdfContainer" class="relative w-full">
             <!-- PDF Viewer -->
             <canvas id="pdfViewer" class="w-full h-full"></canvas>
-            
+
             <!-- Kontrol Halaman -->
             <div class="page-controls">
                 <button id="prevPage" disabled>Previous</button>
                 <span id="pageInfo">Page: <span id="pageNum">1</span> / <span id="pageCount">1</span></span>
                 <button id="nextPage">Next</button>
             </div>
-            
+
             <!-- QR Code Draggable -->
-            <div id="qrCode" class="absolute bg-white rounded-lg shadow-lg cursor-move"
+            <div id="qrCode" class="absolute bg-white rounded-lg shadow-lg"
                  style="width: 100px; height: 100px; top: 50px; left: 50px;">
-                <img id="qrImage" 
-                     src="{{ asset('storage/' . $dokumen->qr_code_path) }}" 
-                     alt="QR Code" 
+                <img id="qrImage"
+                     src="{{ asset('storage/' . $dokumen->qr_code_path) }}"
+                     alt="QR Code"
                      class="w-full h-full object-contain"/>
-                <div class="absolute right-0 bottom-0 w-4 h-4 bg-blue-500 rounded-full opacity-50 cursor-se-resize"></div>
+                <!-- Resize handle -->
+                <div class="absolute right-0 bottom-0 w-4 h-4 bg-blue-500 rounded-full opacity-50 cursor-se-resize" id="resizeHandle"></div>
+
+                <!-- Move control button -->
+                <div class="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
+                    <button id="moveControl" class="p-2 bg-gray-200 rounded-full hover:bg-gray-300">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h18M12 3v18m-6-6l6 6 6-6m-12-6l6-6 6 6" />
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -138,16 +148,16 @@
 
     async function renderPage(num) {
         pageRendering = true;
-        
+
         try {
             const page = await pdfDoc.getPage(num);
             const canvas = document.getElementById('pdfViewer');
             const context = canvas.getContext('2d');
-            
+
             // Calculate scale based on container width
             const containerWidth = canvas.parentElement.clientWidth;
             const viewport = page.getViewport({ scale: 1 });
-            
+
             // Increase scale for better visibility
             const scale = Math.min(
                 (containerWidth - 20) / viewport.width, // Reduced padding
@@ -163,7 +173,7 @@
                 canvasContext: context,
                 viewport: scaledViewport
             };
-            
+
             await page.render(renderContext).promise;
             pageRendering = false;
 
@@ -208,7 +218,7 @@
             const url = "{{ asset('storage/' . $dokumen->file) }}";
             pdfDoc = await pdfjsLib.getDocument(url).promise;
             document.getElementById('pageCount').textContent = pdfDoc.numPages;
-            
+
             // Render halaman pertama
             renderPage(pageNum);
 
@@ -226,10 +236,11 @@
         initializeInteract();
     });
 
-    // Kode interact.js yang sudah ada
+    // Update fungsi initializeInteract
     function initializeInteract() {
         interact('#qrCode')
             .draggable({
+                enabled: false,
                 inertia: true,
                 modifiers: [
                     interact.modifiers.restrictRect({
@@ -243,19 +254,28 @@
                 }
             })
             .resizable({
-                edges: { left: true, right: true, bottom: true, top: true },
-                restrictEdges: {
-                    outer: 'parent',
-                    endOnly: true,
-                },
-                restrictSize: {
-                    min: { width: 50, height: 50 },    // Ukuran minimum yang lebih besar
-                    max: { width: 150, height: 150 },  // Ukuran maksimum yang lebih besar
-                },
-                inertia: true,
+                edges: { right: true, bottom: true },
                 listeners: {
-                    move: resizeMoveListener
-                }
+                    move: function (event) {
+                        let { x, y } = event.target.dataset;
+
+                        x = (parseFloat(x) || 0);
+                        y = (parseFloat(y) || 0);
+
+                        Object.assign(event.target.style, {
+                            width: `${event.rect.width}px`,
+                            height: `${event.rect.height}px`,
+                            transform: `translate(${x}px, ${y}px)`
+                        });
+                    }
+                },
+                modifiers: [
+                    interact.modifiers.restrictSize({
+                        min: { width: 30, height: 30 },
+                        max: { width: 150, height: 150 }
+                    })
+                ],
+                inertia: true
             });
     }
 
@@ -270,35 +290,19 @@
         target.setAttribute('data-y', y);
     }
 
-    function resizeMoveListener(event) {
-        const target = event.target;
-        let x = (parseFloat(target.getAttribute('data-x')) || 0);
-        let y = (parseFloat(target.getAttribute('data-y')) || 0);
-
-        target.style.width = `${event.rect.width}px`;
-        target.style.height = `${event.rect.height}px`;
-
-        x += event.deltaRect.left;
-        y += event.deltaRect.top;
-
-        target.style.transform = `translate(${x}px, ${y}px)`;
-        target.setAttribute('data-x', x);
-        target.setAttribute('data-y', y);
-    }
-
     // Fungsi untuk menghitung posisi relatif
     function calculateRelativePosition(element, container) {
         const elementRect = element.getBoundingClientRect();
         const containerRect = container.getBoundingClientRect();
-        
+
         // Hitung posisi relatif dalam persentase
         const x = ((elementRect.left - containerRect.left) / containerRect.width) * 100;
         const y = ((elementRect.top - containerRect.top) / containerRect.height) * 100;
-        
+
         // Hitung ukuran relatif dalam persentase
         const width = (elementRect.width / containerRect.width) * 100;
         const height = (elementRect.height / containerRect.height) * 100;
-        
+
         return {
             x: x,
             y: y,
@@ -339,5 +343,51 @@
             alert('Gagal menyimpan posisi QR code');
         });
     }
+
+    // Update event listeners for move control
+    document.addEventListener('DOMContentLoaded', function() {
+        const moveControl = document.getElementById('moveControl');
+        let isDragging = false;
+        let startX, startY;
+        let qrElement = document.getElementById('qrCode');
+        let originalWidth, originalHeight;
+
+        moveControl.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            // Store original dimensions
+            originalWidth = qrElement.offsetWidth;
+            originalHeight = qrElement.offsetHeight;
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+
+            const currentX = parseFloat(qrElement.getAttribute('data-x')) || 0;
+            const currentY = parseFloat(qrElement.getAttribute('data-y')) || 0;
+
+            const newX = currentX + dx;
+            const newY = currentY + dy;
+
+            // Maintain original dimensions while moving
+            qrElement.style.width = `${originalWidth}px`;
+            qrElement.style.height = `${originalHeight}px`;
+            qrElement.style.transform = `translate(${newX}px, ${newY}px)`;
+            qrElement.setAttribute('data-x', newX);
+            qrElement.setAttribute('data-y', newY);
+
+            startX = e.clientX;
+            startY = e.clientY;
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+        });
+    });
 </script>
 @endsection
