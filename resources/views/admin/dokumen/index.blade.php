@@ -3,9 +3,9 @@
 @section('title', 'Semua Dokumen')
 
 @section('content')
-<div class="flex flex-col">
+<div class="flex overflow-hidden flex-col">
     <div class="overflow-x-auto">
-        <div class="inline-block min-w-full py-2">
+        <div class="inline-block py-2 min-w-full">
             <div class="overflow-hidden bg-white rounded-lg shadow-sm">
                 <!-- Header -->
                 <div class="px-6 py-4 border-b border-gray-200">
@@ -21,14 +21,14 @@
                                    name="search"
                                    value="{{ request('search') }}"
                                    placeholder="Cari berdasarkan nama, NIM, judul dokumen..."
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                   class="px-4 py-2 w-full rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500">
                         </div>
 
                         <!-- Status filter -->
                         <div class="w-48">
                             <select name="status"
                                     onchange="this.form.submit()"
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                    class="px-4 py-2 w-full rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500">
                                 <option value="">Semua Status</option>
                                 <option value="diajukan" {{ request('status') == 'diajukan' ? 'selected' : '' }}>Diajukan</option>
                                 <option value="disahkan" {{ request('status') == 'disahkan' ? 'selected' : '' }}>Disahkan</option>
@@ -40,7 +40,7 @@
                         <div class="w-32">
                             <select name="per_page"
                                     onchange="this.form.submit()"
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                    class="px-4 py-2 w-full rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500">
                                 <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10 per hal</option>
                                 <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25 per hal</option>
                                 <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50 per hal</option>
@@ -112,14 +112,14 @@
                 </div>
 
                 <!-- Modal -->
-                <div id="documentModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-                    <div class="flex items-center justify-center min-h-screen px-4">
-                        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
+                <div id="documentModal" class="hidden overflow-y-auto fixed inset-0 z-50">
+                    <div class="flex justify-center items-center px-4 min-h-screen">
+                        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
 
                         <div class="relative w-full max-w-lg bg-white rounded-lg shadow-xl">
                             <div class="px-6 py-4 border-b border-gray-200">
                                 <h3 class="text-lg font-medium text-gray-900">Detail Dokumen</h3>
-                                <button onclick="closeModal()" class="absolute text-gray-400 top-4 right-4 hover:text-gray-500">
+                                <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500">
                                     <span class="sr-only">Close</span>
                                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -152,15 +152,15 @@
                 <!-- Pagination -->
                 @if($dokumens->hasPages())
                 <div class="px-6 py-4 border-t border-gray-200">
-                    <div class="flex items-center justify-between">
+                    <div class="flex justify-between items-center">
                         <!-- Previous Page Link -->
-                        <div class="flex justify-start flex-1">
+                        <div class="flex flex-1 justify-start">
                             @if($dokumens->onFirstPage())
-                                <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md cursor-default">
+                                <span class="inline-flex relative items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white rounded-md border border-gray-300 cursor-default">
                                     Previous
                                 </span>
                             @else
-                                <a href="{{ $dokumens->previousPageUrl() }}" class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                                <a href="{{ $dokumens->previousPageUrl() }}" class="inline-flex relative items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-md border border-gray-300 hover:bg-gray-50">
                                     Previous
                                 </a>
                             @endif
@@ -170,11 +170,11 @@
                         <div class="hidden md:flex">
                             @foreach($dokumens->getUrlRange(1, $dokumens->lastPage()) as $page => $url)
                                 @if($page == $dokumens->currentPage())
-                                    <span class="relative inline-flex items-center px-4 py-2 mx-1 text-sm font-medium text-white bg-blue-600 border border-gray-300 rounded-md cursor-default">
+                                    <span class="inline-flex relative items-center px-4 py-2 mx-1 text-sm font-medium text-white bg-blue-600 rounded-md border border-gray-300 cursor-default">
                                         {{ $page }}
                                     </span>
                                 @else
-                                    <a href="{{ $url }}" class="relative inline-flex items-center px-4 py-2 mx-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                                    <a href="{{ $url }}" class="inline-flex relative items-center px-4 py-2 mx-1 text-sm font-medium text-gray-700 bg-white rounded-md border border-gray-300 hover:bg-gray-50">
                                         {{ $page }}
                                     </a>
                                 @endif
@@ -182,13 +182,13 @@
                         </div>
 
                         <!-- Next Page Link -->
-                        <div class="flex justify-end flex-1">
+                        <div class="flex flex-1 justify-end">
                             @if($dokumens->hasMorePages())
-                                <a href="{{ $dokumens->nextPageUrl() }}" class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                                <a href="{{ $dokumens->nextPageUrl() }}" class="inline-flex relative items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-md border border-gray-300 hover:bg-gray-50">
                                     Next
                                 </a>
                             @else
-                                <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md cursor-default">
+                                <span class="inline-flex relative items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white rounded-md border border-gray-300 cursor-default">
                                     Next
                                 </span>
                             @endif
@@ -221,7 +221,7 @@ function openModal(documentId) {
             currentFileUrl = `/storage/${data.file}`;
             document.getElementById('modalContent').innerHTML = `
                 <div class="space-y-4">
-                    <div class="p-4 mb-4 bg-gray-100 border border-blue-500 rounded-lg">
+                    <div class="p-4 mb-4 bg-gray-100 rounded-lg border border-blue-500">
                         <iframe src="${currentFileUrl}" width="100%" height="500px"></iframe>
                     </div>
                     <div>

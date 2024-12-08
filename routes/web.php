@@ -13,7 +13,10 @@ use App\Http\Controllers\Admin\Auth\AdminLoginController;
 use App\Http\Controllers\Admin\Auth\AdminDashboardController;
 use App\Http\Controllers\Admin\Auth\AdminDokumenController;
 use App\Http\Controllers\DocumentController;
+<<<<<<< HEAD
 
+=======
+>>>>>>> e047187b14b1b34a520e726854aacc1dedb6a069
 
 //login
 Route::get('/', [LoginAuthController::class, 'showLoginForm'])->name('login');

@@ -154,8 +154,10 @@
                                 </p>
                                 <p class="text-sm text-gray-500">
                                     Status: <span class="font-medium">{{ ucfirst($activity->status_dokumen) }}</span>
-                                    @if($activity->dosen)
-                                        Kepada {{ $activity->dosen->nama_dosen }}
+                                    @if($activity->status_dokumen === 'disahkan')
+                                        oleh {{ $activity->dosen->nama_dosen }}
+                                    @elseif($activity->status_dokumen === 'diajukan')
+                                        kepada {{ $activity->dosen->nama_dosen }}
                                     @endif
                                 </p>
                                 <p class="text-xs text-gray-400">{{ $activity->created_at->diffForHumans() }}</p>
