@@ -209,6 +209,23 @@
         </div>
     </div>
 
+    <!-- Notification -->
+    <div id="notification" class="hidden fixed top-4 right-4 z-50 max-w-md">
+        <div class="rounded-lg shadow-lg">
+            <div id="notificationContent" class="flex items-center p-4 text-white">
+                <svg class="mr-2 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span id="notificationMessage"></span>
+                <button onclick="hideNotification()" class="ml-4">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/interact.js/1.10.11/interact.min.js"></script>
     <script>
     let currentDocumentId = null;
@@ -249,9 +266,8 @@
                         </div>
                     </div>
                 `;
+                document.getElementById('documentModal').classList.remove('hidden');
             });
-
-        document.getElementById('documentModal').classList.remove('hidden');
     }
 
     function closeModal() {
@@ -279,15 +295,10 @@
         }
     }
 
-    function generateQrCode(documentId) {
-        if (!documentId) return;
+    function generateQrCode() {
+        if (!currentDocumentId) return;
 
-        const button = document.querySelector(`button[onclick="generateQrCode(${documentId})"]`);
-        const originalText = button.innerHTML;
-        button.innerHTML = 'Generating...';
-        button.disabled = true;
-
-        fetch(`/dosen/dokumen/${documentId}/generate-qr`, {
+        fetch(`/dosen/dokumen/${currentDocumentId}/generate-qr`, {
             method: 'GET',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -299,35 +310,17 @@
             if (data.success) {
                 document.getElementById('modalContent').classList.add('hidden');
                 document.getElementById('qrCodeEditor').classList.remove('hidden');
-
-                document.getElementById('pdfFrame').src = currentFileUrl;
-
-                const qrCode = document.getElementById('qrCode');
-                const qrImage = document.getElementById('qrImage');
-
-                qrImage.onload = function() {
-                    qrCode.classList.remove('hidden');
-                    initializeInteract();
-                };
-
-                qrImage.src = data.qrCodeUrl;
-
-                qrCode.style.transform = 'translate(50px, 50px)';
-                qrCode.setAttribute('data-x', 50);
-                qrCode.setAttribute('data-y', 50);
-                qrCode.style.width = '100px';
-                qrCode.style.height = '100px';
+                document.getElementById('qrImage').src = data.qrCodeUrl;
+                document.getElementById('qrCode').classList.remove('hidden');
+                initializeInteract();
+                showNotification('QR Code berhasil dibuat', 'success');
             } else {
-                alert(data.message || 'Failed to generate QR Code');
+                showNotification(data.message || 'Gagal generate QR Code', 'error');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error generating QR Code');
-        })
-        .finally(() => {
-            button.innerHTML = originalText;
-            button.disabled = false;
+            showNotification('Error generating QR Code', 'error');
         });
     }
 
@@ -393,10 +386,6 @@
 
     function saveQrPosition() {
         const qrElement = document.getElementById('qrCode');
-        const rect = qrElement.getBoundingClientRect();
-        const containerRect = document.getElementById('pdfFrame').getBoundingClientRect();
-
-        // Calculate relative position
         const position = {
             x: (parseFloat(qrElement.getAttribute('data-x')) || 0),
             y: (parseFloat(qrElement.getAttribute('data-y')) || 0),
@@ -415,15 +404,15 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Posisi QR code berhasil disimpan');
-                location.reload();
+                showNotification('Posisi QR code berhasil disimpan', 'success');
+                setTimeout(() => location.reload(), 2000);
             } else {
-                alert(data.message || 'Gagal menyimpan posisi QR code');
+                showNotification(data.message || 'Gagal menyimpan posisi QR code', 'error');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Gagal menyimpan posisi QR code');
+            showNotification('Gagal menyimpan posisi QR code', 'error');
         });
     }
 
@@ -433,6 +422,7 @@
     }
 
     function editQrCode() {
+<<<<<<< HEAD
         if (!currentDocumentId) return;
 
         // Generate QR Code first
@@ -456,6 +446,11 @@
             console.error('Error:', error);
             alert('Error generating QR Code');
         });
+=======
+        generateQrCode(); // Panggil fungsi generateQrCode langsung
+        // Pastikan iframe PDF di-update dengan URL yang benar
+        document.getElementById('pdfFrame').src = currentFileUrl;
+>>>>>>> e047187b14b1b34a520e726854aacc1dedb6a069
     }
 
     // Close modal when clicking outside
@@ -464,5 +459,31 @@
             closeModal();
         }
     });
+
+    // Notification functions
+    function showNotification(message, type = 'success') {
+        const notification = document.getElementById('notification');
+        const content = document.getElementById('notificationContent');
+        const messageElement = document.getElementById('notificationMessage');
+
+        // Set colors based on type
+        const colors = {
+            success: 'bg-green-500',
+            error: 'bg-red-500',
+            warning: 'bg-yellow-500'
+        };
+
+        // Remove any existing color classes
+        content.className = 'flex items-center p-4 text-white ' + colors[type];
+        messageElement.textContent = message;
+        notification.classList.remove('hidden');
+
+        // Auto-hide after 5 seconds
+        setTimeout(hideNotification, 5000);
+    }
+
+    function hideNotification() {
+        document.getElementById('notification').classList.add('hidden');
+    }
     </script>
 @endsection

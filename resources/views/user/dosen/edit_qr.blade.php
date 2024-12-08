@@ -117,17 +117,12 @@
             </div>
 
             <!-- QR Code Draggable -->
-            <div id="qrCode" class="absolute bg-white rounded-lg shadow-lg"
-                 style="width: 100px; height: auto; top: 50px; left: 50px;">
+            <div id="qrCode" class="absolute bg-white rounded-lg shadow-lg cursor-move"
+                 style="width: 100px; height: 100px; top: 50px; left: 50px;">
                 <img id="qrImage"
                      src="{{ asset('storage/' . $dokumen->qr_code_path) }}"
                      alt="QR Code"
-                     class="object-contain w-full"/>
-                <div class="move-handle" id="moveHandle">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M8 0a.5.5 0 0 1 .5.5v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 1 1 .708-.708L7.5 4.293V.5A.5.5 0 0 1 8 0zm-.5 11.707-1.146 1.147a.5.5 0 0 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 11.707V15.5a.5.5 0 0 1-1 0v-3.793zM0 8a.5.5 0 0 1 .5-.5h3.793L3.146 6.354a.5.5 0 1 1 .708-.708l2 2a.5.5 0 0 1 0 .708l-2 2a.5.5 0 0 1-.708-.708L4.293 8.5H.5A.5.5 0 0 1 0 8zm15.5-.5H11.707l1.147-1.146a.5.5 0 0 0-.708-.708l-2 2a.5.5 0 0 0 0 .708l2 2a.5.5 0 0 0 .708-.708L11.707 8.5H15.5a.5.5 0 0 0 0-1z"/>
-                    </svg>
-                </div>
+                     class="object-contain w-full h-full"/>
                 <div class="absolute right-0 bottom-0 w-4 h-4 bg-blue-500 rounded-full opacity-50 cursor-se-resize"></div>
             </div>
         </div>
@@ -254,11 +249,12 @@
         initializeInteract();
     });
 
-    // Kode interact.js yang sudah ada
+    // Update fungsi initializeInteract
     function initializeInteract() {
         // QR code draggable
         interact('#qrCode')
             .draggable({
+                enabled: false,
                 inertia: true,
                 modifiers: [
                     interact.modifiers.restrictRect({
@@ -278,13 +274,31 @@
                     endOnly: true,
                 },
                 restrictSize: {
-                    min: { width: 30, height: 30 },
-                    max: { width: 150, height: 150 },
+                    min: { width: 50, height: 50 },    // Ukuran minimum yang lebih besar
+                    max: { width: 150, height: 150 },  // Ukuran maksimum yang lebih besar
                 },
                 inertia: true,
                 listeners: {
-                    move: resizeMoveListener
-                }
+                    move: function (event) {
+                        let { x, y } = event.target.dataset;
+
+                        x = (parseFloat(x) || 0);
+                        y = (parseFloat(y) || 0);
+
+                        Object.assign(event.target.style, {
+                            width: `${event.rect.width}px`,
+                            height: `${event.rect.height}px`,
+                            transform: `translate(${x}px, ${y}px)`
+                        });
+                    }
+                },
+                modifiers: [
+                    interact.modifiers.restrictSize({
+                        min: { width: 30, height: 30 },
+                        max: { width: 150, height: 150 }
+                    })
+                ],
+                inertia: true
             });
 
         // Tambahkan draggable untuk move handle
@@ -308,6 +322,16 @@
     }
 
     // Fungsi-fungsi lain tetap sama
+    function dragMoveListener(event) {
+        const target = event.target;
+        const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+        const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+        target.style.transform = `translate(${x}px, ${y}px)`;
+        target.setAttribute('data-x', x);
+        target.setAttribute('data-y', y);
+    }
+
     function resizeMoveListener(event) {
         const target = event.target;
         let x = (parseFloat(target.getAttribute('data-x')) || 0);
@@ -376,16 +400,6 @@
             console.error('Error:', error);
             alert('Gagal menyimpan posisi QR code');
         });
-    }
-
-    // Update fungsi dragMoveListener
-    function dragMoveListener(event, target = event.target) {
-        const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-        const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-
-        target.style.transform = `translate(${x}px, ${y}px)`;
-        target.setAttribute('data-x', x);
-        target.setAttribute('data-y', y);
     }
 </script>
 @endsection
