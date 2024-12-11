@@ -19,26 +19,26 @@
             </div>
             <nav class="mt-4">
                 <a href="{{ route('admin.adminDashboard') }}" class="flex items-center px-4 py-3 {{ request()->routeIs('admin.adminDashboard') ? 'bg-[#fd7e14]' : 'hover:bg-gray-700' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="mr-3 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                     Dashboard
                 </a>
                 <a href="{{ route('admin.dosen.index') }}" class="flex items-center px-4 py-3 {{ request()->routeIs('admin.dosen.*') ? 'bg-[#fd7e14]' : 'hover:bg-gray-700' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="mr-3 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                     </svg>
                     Dosen
                 </a>
                 <a href="{{ route('admin.ormawa.index') }}" class="flex items-center px-4 py-3 {{ request()->routeIs('admin.ormawa.*') ? 'bg-[#fd7e14]' : 'hover:bg-gray-700' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="mr-3 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                     </svg>
                     Ormawa
                 </a>
 
                 <a href="{{ route('admin.dokumen.index') }}" class="flex items-center px-4 py-3 {{ request()->routeIs('admin.dokumen.*') ? 'bg-[#fd7e14]' : 'hover:bg-gray-700' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="mr-3 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
                     Dokumen
@@ -52,7 +52,7 @@
 
             <!-- Page Content -->
             <main class="p-6">
-                <div class="overflow-x-auto">
+                <div>
                     @yield('content')
                 </div>
             </main>

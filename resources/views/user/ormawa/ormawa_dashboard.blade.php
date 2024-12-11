@@ -1,7 +1,7 @@
 @extends('layouts.ormawa')
 @section('title', 'Dashboard Ormawa')
 @section('content')
-  <div class="container flex-grow px-4 mx-auto mt-8 max-w-5xl">
+<div class="container flex-grow px-4 mx-auto mt-8 max-w-5xl">
     <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
         <!-- Dokumen Diajukan -->
         <a href="{{ route('ormawa.riwayat', ['status' => 'diajukan']) }}" class="block">
@@ -19,7 +19,6 @@
                 </div>
             </div>
         </a>
-
         <!-- Dokumen Tertanda -->
         <a href="{{ route('ormawa.riwayat', ['status' => 'disahkan']) }}" class="block">
             <div class="p-6 bg-green-400 rounded-xl shadow-lg hover:shadow-xl hover:bg-green-500  transition-color duration-300">
@@ -200,16 +199,16 @@
 
       function showModal(documentId) {
         currentDocumentId = documentId;
-        
+
         fetch(`/ormawa/dokumen/${documentId}`)
             .then(response => response.json())
             .then(data => {
                 currentFileUrl = data.file_url;
                 document.getElementById('modalContent').innerHTML = `
                     <div class="space-y-4">
-                        <iframe 
-                            src="${data.file_url}" 
-                            class="w-full h-[500px]" 
+                        <iframe
+                            src="${data.file_url}"
+                            class="w-full h-[500px]"
                             frameborder="0"
                         ></iframe>
                         <div>
@@ -244,7 +243,7 @@
                         ` : ''}
                     </div>
                 `;
-                
+
                 // Add event listener for form submission
                 if (data.status_dokumen === 'butuh_revisi') {
                     document.getElementById('updateDokumenForm').addEventListener('submit', function(e) {
@@ -252,7 +251,7 @@
                         updateDokumen(documentId, this);
                     });
                 }
-                
+
                 document.getElementById('detailModal').classList.remove('hidden');
             })
             .catch(error => {
@@ -286,7 +285,7 @@
 
       function updateDokumen(documentId, form) {
           const formData = new FormData(form);
-          
+
           // Tambahkan CSRF token
           formData.append('_token', '{{ csrf_token() }}');
 

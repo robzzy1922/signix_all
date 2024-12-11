@@ -4,22 +4,22 @@
 
 @section('content')
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 gap-6 mb-8 md:grid-cols-3">
-        <a href="{{ route('admin.dokumen.index', ['status' => 'diajukan']) }}" class="bg-[#fd7e14] text-white rounded-xl p-6 hover:bg-[#e76b0a] transition-colors duration-200">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-white/20">
+    <div class="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-2 lg:grid-cols-3">
+        <a href="{{ route('admin.dokumen.index', ['status' => 'diajukan']) }}" class="bg-[#fd7e14] text-white rounded-xl p-4 sm:p-6 hover:bg-[#e76b0a] transition-all duration-300 transform hover:scale-100 animate-slideInFromLeft">
+            <div class="flex flex-col items-center sm:flex-row">
+                <div class="p-3 mb-4 rounded-full bg-white/20 sm:mb-0">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                     </svg>
                 </div>
-                <div class="ml-4">
-                    <h2 class="text-3xl font-bold">{{ $diajukanDocuments }}</h2>
+                <div class="text-center sm:text-left sm:ml-4">
+                    <h2 class="text-2xl font-bold sm:text-3xl">{{ $diajukanDocuments }}</h2>
                     <p class="text-white/80">Surat yang diajukan</p>
                 </div>
             </div>
         </a>
 
-        <a href="{{ route('admin.dokumen.index', ['status' => 'disahkan']) }}" class="bg-[#28a745] text-white rounded-xl p-6 hover:bg-[#218838] transition-colors duration-200">
+        <a href="{{ route('admin.dokumen.index', ['status' => 'disahkan']) }}" class="bg-[#28a745] text-white rounded-xl p-6 hover:bg-[#218838] transition-all duration-300 transform hover:scale-100 animate-slideInFromTop">
             <div class="flex items-center">
                 <div class="p-3 rounded-full bg-white/20">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -33,7 +33,7 @@
             </div>
         </a>
 
-        <a href="{{ route('admin.dokumen.index', ['status' => 'direvisi']) }}" class="bg-[#4e73df] text-white rounded-xl p-6 hover:bg-[#4262c5] transition-colors duration-200">
+        <a href="{{ route('admin.dokumen.index', ['status' => 'direvisi']) }}" class="bg-[#4e73df] text-white rounded-xl p-6 hover:bg-[#4262c5] transition-all duration-300 transform hover:scale-100 animate-slideInFromRight">
             <div class="flex items-center">
                 <div class="p-3 rounded-full bg-white/20">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -49,12 +49,12 @@
     </div>
 
     <!-- Data Tables -->
-    <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+    <div class="grid grid-cols-1 gap-8 lg:grid-cols-2 animate-slideInFromBottom">
         <!-- User Data -->
         <div class="overflow-hidden bg-white rounded-xl shadow-lg">
-            <div class="flex justify-between items-center p-6 bg-gray-50 border-b border-gray-200">
-                <h2 class="text-xl font-bold text-gray-800">Data User Terbaru</h2>
-                <div class="flex space-x-2">
+            <div class="flex flex-col justify-between items-center p-6 border-b border-gray-200 sm:flex-row">
+                <h2 class="mb-4 text-xl font-bold text-gray-800 sm:mb-0">Pengguna Terbaru</h2>
+                <div class="flex flex-wrap gap-2">
                     <a href="{{ route('admin.ormawa.index') }}" class="px-4 py-2 text-sm font-medium text-blue-600 rounded-lg transition-colors duration-200 hover:text-blue-700 hover:bg-blue-50">
                         Ormawa
                     </a>
@@ -67,10 +67,10 @@
                 <table class="w-full">
                     <thead>
                         <tr class="text-left bg-gray-50">
-                            <th class="px-6 py-3 font-semibold tracking-wider text-gray-600">Nama</th>
-                            <th class="px-6 py-3 font-semibold tracking-wider text-gray-600">Email</th>
-                            <th class="px-6 py-3 font-semibold tracking-wider text-gray-600">Role</th>
-                            <th class="px-6 py-3 font-semibold tracking-wider text-gray-600">Bergabung</th>
+                            <th class="px-4 py-3 font-semibold tracking-wider text-gray-600 sm:px-6">Nama</th>
+                            <th class="hidden px-6 py-3 font-semibold tracking-wider text-gray-600 sm:table-cell">Email</th>
+                            <th class="px-4 py-3 font-semibold tracking-wider text-gray-600 sm:px-6">Role</th>
+                            <th class="hidden px-6 py-3 font-semibold tracking-wider text-gray-600 sm:table-cell">Bergabung</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
