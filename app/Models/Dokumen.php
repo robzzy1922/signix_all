@@ -14,15 +14,12 @@ class Dokumen extends Model
 
     protected $fillable = [
         'file',
-        'nomor_surat',
-        'perihal',
         'qr_position_x',
         'qr_position_y',
         'qr_width',
         'qr_height',
         'status_dokumen',
         'is_signed',
-        'qr_code_path',
         'kode_pengesahan',
         'tanggal_verifikasi',
         'keterangan',
@@ -32,6 +29,8 @@ class Dokumen extends Model
 
     protected $casts = [
         'tanggal_verifikasi' => 'datetime',
+        'is_signed',
+        'kode_pengesahan'
     ];
 
     // Relationship with Ormawa
@@ -45,5 +44,5 @@ class Dokumen extends Model
     {
         return $this->belongsTo(Dosen::class, 'id_dosen');
     }
-    
+
 }

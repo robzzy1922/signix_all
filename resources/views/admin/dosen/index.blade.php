@@ -3,7 +3,7 @@
 @section('title', 'Dosen')
 
 @section('content')
-<div class="container overflow-x-hidden px-4 py-8 mx-auto max-w-full sm:px-6 lg:px-8">
+<div class="container max-w-full px-4 py-8 mx-auto overflow-x-hidden sm:px-6 lg:px-8">
     <!-- Breadcrumb -->
     <nav class="flex mb-8" aria-label="Breadcrumb">
         <ol class="inline-flex items-center space-x-1 md:space-x-3">

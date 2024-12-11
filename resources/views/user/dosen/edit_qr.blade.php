@@ -14,7 +14,7 @@
         height: 100%;
         overflow: hidden; /* Prevent content from overflowing */
     }
-    
+
     #pdfViewer {
         background-color: white;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -94,32 +94,16 @@
         background: #9CA3AF;
         cursor: not-allowed;
     }
-
-    .resize-handle {
-        position: absolute;
-        right: 0;
-        bottom: 0;
-        width: 10px;
-        height: 10px;
-        background: transparent;
-        cursor: se-resize;
-        border: 2px solid rgba(59, 130, 246, 0.5);
-        border-radius: 50%;
-    }
-
-    .resize-handle:hover {
-        background: rgba(59, 130, 246, 0.2);
-    }
 </style>
 
-<div class="container mx-auto px-4 py-8 max-w-6xl">
+<div class="container px-4 py-8 mx-auto max-w-6xl">
     @if(isset($dokumen))
         <!-- Breadcrumb -->
         <nav class="flex mb-4" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-3">
                 <li class="inline-flex items-center">
                     <a href="{{ route('dosen.dashboard') }}" class="inline-flex items-center text-gray-700 hover:text-blue-600">
-                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <svg class="mr-2 w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                             <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
                         </svg>
                         Dashboard
@@ -158,26 +142,21 @@
         <div id="pdfContainer" class="relative w-full">
             <!-- PDF Viewer -->
             <canvas id="pdfViewer" class="w-full h-full"></canvas>
-            
+
             <!-- Kontrol Halaman -->
             <div class="page-controls">
                 <button id="prevPage" disabled>Previous</button>
                 <span id="pageInfo">Page: <span id="pageNum">1</span> / <span id="pageCount">1</span></span>
                 <button id="nextPage">Next</button>
             </div>
-            
+
             <!-- QR Code Draggable -->
             <div id="qrCode" class="absolute bg-white rounded-lg shadow-lg"
                  style="width: 100px; height: 100px; top: 50px; left: 50px;">
                 <img id="qrImage"
                      src="{{ asset('storage/' . $dokumen->qr_code_path) }}"
                      alt="QR Code"
-                     class="object-contain w-full h-full"/>
-                <div id="moveHandle" class="move-handle">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M7.646.146a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 1.707V5.5a.5.5 0 0 1-1 0V1.707L6.354 2.854a.5.5 0 1 1-.708-.708l2-2zM8 10a.5.5 0 0 1 .5.5v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 .708-.708L7.5 14.293V10.5A.5.5 0 0 1 8 10zM.146 8.354a.5.5 0 0 1 0-.708l2-2a.5.5 0 1 1 .708.708L1.707 7.5H5.5a.5.5 0 0 1 0 1H1.707l1.147 1.146a.5.5 0 0 1-.708.708l-2-2zM10 8a.5.5 0 0 1 .5-.5h3.793l-1.147-1.146a.5.5 0 0 1 .708-.708l2 2a.5.5 0 0 1 0 .708l-2 2a.5.5 0 0 1-.708-.708L14.293 8.5H10.5A.5.5 0 0 1 10 8z"/>
-                    </svg>
-                </div>
+                     class="w-full h-full object-contain"/>
                 <div class="absolute right-0 bottom-0 w-4 h-4 bg-blue-500 rounded-full opacity-50 cursor-se-resize"></div>
             </div>
         </div>
@@ -194,9 +173,9 @@
             </a>
         </div>
     @else
-        <div class="text-center py-8">
+        <div class="py-8 text-center">
             <p class="text-red-500">Dokumen tidak ditemukan.</p>
-            <a href="{{ route('dosen.dashboard') }}" class="mt-4 inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+            <a href="{{ route('dosen.dashboard') }}" class="inline-block px-4 py-2 mt-4 text-white bg-blue-500 rounded hover:bg-blue-600">
                 Kembali ke Dashboard
             </a>
         </div>
@@ -216,16 +195,16 @@
 
     async function renderPage(num) {
         pageRendering = true;
-        
+
         try {
             const page = await pdfDoc.getPage(num);
             const canvas = document.getElementById('pdfViewer');
             const context = canvas.getContext('2d');
-            
+
             // Calculate scale based on container width
             const containerWidth = canvas.parentElement.clientWidth;
             const viewport = page.getViewport({ scale: 1 });
-            
+
             // Increase scale for better visibility
             const scale = Math.min(
                 (containerWidth - 20) / viewport.width, // Reduced padding
@@ -241,7 +220,7 @@
                 canvasContext: context,
                 viewport: scaledViewport
             };
-            
+
             await page.render(renderContext).promise;
             pageRendering = false;
 
@@ -286,7 +265,7 @@
             const url = "{{ asset('storage/' . $dokumen->file) }}";
             pdfDoc = await pdfjsLib.getDocument(url).promise;
             document.getElementById('pageCount').textContent = pdfDoc.numPages;
-            
+
             // Render halaman pertama
             renderPage(pageNum);
 
@@ -304,12 +283,11 @@
         initializeInteract();
     });
 
-    // Kode interact.js yang sudah ada
+    // Update fungsi initializeInteract
     function initializeInteract() {
         // QR code draggable
         interact('#qrCode')
             .draggable({
-                enabled: true,
                 inertia: true,
                 modifiers: [
                     interact.modifiers.restrictRect({
@@ -335,7 +313,44 @@
                 },
                 inertia: true,
                 listeners: {
-                    move: resizeMoveListener
+                    move: function (event) {
+                        let { x, y } = event.target.dataset;
+
+                        x = (parseFloat(x) || 0);
+                        y = (parseFloat(y) || 0);
+
+                        Object.assign(event.target.style, {
+                            width: `${event.rect.width}px`,
+                            height: `${event.rect.height}px`,
+                            transform: `translate(${x}px, ${y}px)`
+                        });
+                    }
+                },
+                modifiers: [
+                    interact.modifiers.restrictSize({
+                        min: { width: 30, height: 30 },
+                        max: { width: 150, height: 150 }
+                    })
+                ],
+                inertia: true
+            });
+
+        // Tambahkan draggable untuk move handle
+        interact('#moveHandle')
+            .draggable({
+                inertia: true,
+                modifiers: [
+                    interact.modifiers.restrictRect({
+                        restriction: 'parent',
+                        endOnly: true
+                    })
+                ],
+                autoScroll: true,
+                listeners: {
+                    move: function(event) {
+                        const qrCode = document.getElementById('qrCode');
+                        dragMoveListener(event, qrCode);
+                    }
                 }
             });
     }
@@ -371,15 +386,15 @@
     function calculateRelativePosition(element, container) {
         const elementRect = element.getBoundingClientRect();
         const containerRect = container.getBoundingClientRect();
-        
+
         // Hitung posisi relatif dalam persentase
         const x = ((elementRect.left - containerRect.left) / containerRect.width) * 100;
         const y = ((elementRect.top - containerRect.top) / containerRect.height) * 100;
-        
+
         // Hitung ukuran relatif dalam persentase
         const width = (elementRect.width / containerRect.width) * 100;
         const height = (elementRect.height / containerRect.height) * 100;
-        
+
         return {
             x: x,
             y: y,

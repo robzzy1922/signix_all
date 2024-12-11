@@ -20,7 +20,7 @@ class DocumentController extends Controller
 
         $filePath = $request->file('document')->store('documents');
 
-        $document = Document::create([
+        $document = Dokumen::create([
             'user_id' => auth()->id(),
             'file_path' => $filePath,
             'status' => 'pending',
@@ -29,12 +29,12 @@ class DocumentController extends Controller
         return redirect()->route('documents.show', $document);
     }
 
-    public function show(Document $document)
+    public function show(Dokumen $document)
     {
         return view('user.dosen.show', compact('document'));
     }
 
-    public function saveBarcodePosition(Request $request, Document $document)
+    public function saveBarcodePosition(Request $request, Dokumen $document)
     {
         // Validasi posisi
         $request->validate([
@@ -54,13 +54,13 @@ class DocumentController extends Controller
 
         // Generate PDF baru dengan QR code
         $pdf = PDF::loadFile(storage_path('app/' . $document->file_path));
-        
+
         // Tambahkan QR code ke PDF
         $qrCodePath = storage_path('app/' . $document->qr_code_path);
-        $pdf->getCanvas()->addImage($qrCodePath, 
-            $request->x, 
-            $request->y, 
-            $request->x + $request->width, 
+        $pdf->getCanvas()->addImage($qrCodePath,
+            $request->x,
+            $request->y,
+            $request->x + $request->width,
             $request->y + $request->height
         );
 
@@ -77,7 +77,7 @@ class DocumentController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function insertBarcodeToPdf(Document $document)
+    public function insertBarcodeToPdf(Dokumen $document)
     {
         $pdf = Pdf::loadFile(storage_path('app/' . $document->file_path));
 
@@ -86,7 +86,7 @@ class DocumentController extends Controller
 
         $pdf->setOption('isHtml5ParserEnabled', true);
         $pdf->setOption('isPhpEnabled', true);
-    
+
     // Generate PDF yang telah disertakan barcode
     $output = $pdf->output();
 
@@ -94,7 +94,7 @@ class DocumentController extends Controller
         file_put_contents(storage_path('app/documents/signed_' . $document->id . '.pdf'), $output);
     }
 
-    public function generateQrCode(Document $document)
+    public function generateQrCode(Dokumen $document)
     {
         try {
             // Generate unique identifier for QR
@@ -103,15 +103,15 @@ class DocumentController extends Controller
                 'timestamp' => now()->timestamp,
                 'validator' => auth()->id()
             ];
-            
+
             $qrString = json_encode($qrData);
-            
+
             // Generate QR code using Simple QR Code
             $qrCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')
                 ->size(300)
                 ->errorCorrection('H')
                 ->generate($qrString);
-                
+
             // Save QR code to storage
             $qrPath = 'qrcodes/doc_' . $document->id . '_' . time() . '.png';
             Storage::put('public/' . $qrPath, $qrCode);
@@ -146,7 +146,7 @@ class DocumentController extends Controller
     public function viewDocument($id)
     {
         $dokumen = Dokumen::findOrFail($id);
-        
+
         if (!$dokumen->file || !Storage::disk('public')->exists($dokumen->file)) {
             abort(404, 'Document not found');
         }

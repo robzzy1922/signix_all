@@ -3,7 +3,7 @@
 @section('title', 'Semua Dokumen')
 
 @section('content')
-<div class="flex flex-col">
+<div class="flex overflow-hidden flex-col">
     <div class="overflow-x-auto">
         <div class="inline-block py-2 min-w-full">
             <div class="overflow-hidden bg-white rounded-lg shadow-sm">
@@ -18,12 +18,35 @@
                           class="flex flex-col gap-4 sm:flex-row">
                         <!-- Search input -->
                         <div class="flex-1">
-                            <input type="text" name="search" value="{{ request('search') }}"
-                                   class="px-4 py-2 w-full rounded-lg border border-gray-300">
+                            <input type="text"
+                                   name="search"
+                                   value="{{ request('search') }}"
+                                   placeholder="Cari berdasarkan nama, NIM, judul dokumen..."
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                         </div>
-                        <!-- Filter buttons -->
-                        <div class="flex flex-wrap gap-2">
-                            <!-- ... filter buttons ... -->
+
+                        <!-- Status filter -->
+                        <div class="w-48">
+                            <select name="status"
+                                    onchange="this.form.submit()"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Semua Status</option>
+                                <option value="diajukan" {{ request('status') == 'diajukan' ? 'selected' : '' }}>Diajukan</option>
+                                <option value="disahkan" {{ request('status') == 'disahkan' ? 'selected' : '' }}>Disahkan</option>
+                                <option value="direvisi" {{ request('status') == 'direvisi' ? 'selected' : '' }}>Direvisi</option>
+                            </select>
+                        </div>
+
+                        <!-- Per page selector -->
+                        <div class="w-32">
+                            <select name="per_page"
+                                    onchange="this.form.submit()"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10 per hal</option>
+                                <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25 per hal</option>
+                                <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50 per hal</option>
+                                <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100 per hal</option>
+                            </select>
                         </div>
                     </form>
                 </div>
